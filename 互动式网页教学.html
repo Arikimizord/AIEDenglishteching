@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语时态交互学习系统【测试版】</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .tenses-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tenses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .tense-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .tense-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+        }
+        
+        .tense-card.active {
+            background: rgba(86, 140, 255, 0.35);
+            border-color: #568cff;
+            box-shadow: 0 5px 15px rgba(86, 140, 255, 0.4);
+        }
+        
+        .tense-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .tense-structure {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            font-family: monospace;
+        }
+        
+        .visualization-section {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .timeline-container {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline {
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 60px;
+            position: relative;
+            margin-top: 40px;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            top: -30px;
+            transform: translateX(-50%);
+            text-align: center;
+            font-weight: 600;
+            width: 100px;
+        }
+        
+        .past-marker { left: 15%; }
+        .present-marker { left: 50%; }
+        .future-marker { left: 85%; }
+        
+        .timeline-now {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+            width: 4px;
+            background: #ff6b6b;
+            z-index: 5;
+        }
+        
+        .tense-visual {
+            position: absolute;
+            height: 60px;
+            border-radius: 30px;
+            top: 30px;
+            opacity: 0.9;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: 500;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tense-details {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: auto;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .tense-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .tense-structure-large {
+            font-size: 1.4rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        .usage-examples {
+            margin-top: 20px;
+        }
+        
+        .example {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .example-text {
+            flex: 1;
+        }
+        
+        .example-translation {
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .play-btn {
+            background: #568cff;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .play-btn:hover {
+            background: #3a6fd8;
+            transform: scale(1.1);
+        }
+        
+        .comparison-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .comparison-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-select {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .comparison-select option {
+            background: #1a2a6c;
+        }
+        
+        .comparison-visuals {
+            display: flex;
+            gap: 20px;
+            height: 200px;
+        }
+        
+        .comparison-timeline {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .comparison-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .comparison-details {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .comparison-detail {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        .highlight {
+            color: #ffcc66;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .tenses-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .comparison-visuals {
+                flex-direction: column;
+                height: auto;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .tenses-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .comparison-details {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> 英语时态交互学习系统【测试版】</h1>
+            <p class="subtitle">通过动态时间轴和可视化工具，直观理解英语的12种时态用法、结构和时间关系</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="tenses-panel">
+                <h2 class="panel-title"><i class="fas fa-list"></i> 英语时态</h2>
+                <div class="tenses-grid">
+                    <div class="tense-card active" data-tense="present-simple">
+                        <div class="tense-name">一般现在时</div>
+                        <div class="tense-structure">Subject + V1</div>
+                    </div>
+                    <div class="tense-card" data-tense="present-continuous">
+                        <div class="tense-name">现在进行时</div>
+                        <div class="tense-structure">am/is/are + V-ing</div>
+                    </div>
+                    <div class="tense-card" data-tense="present-perfect">
+                        <div class="tense-name">现在完成时</div>
+                        <div class="tense-structure">have/has + V3</div>
+                    </div>
+                    <div class="tense-card" data-tense="present-perfect-continuous">
+                        <div class="tense-name">现在完成进行时</div>
+                        <div class="tense-structure">have/has been + V-ing</div>
+                    </div>
+                    <div class="tense-card" data-tense="past-simple">
+                        <div class="tense-name">一般过去时</div>
+                        <div class="tense-structure">Subject + V2</div>
+                    </div>
+                    <div class="tense-card" data-tense="past-continuous">
+                        <div class="tense-name">过去进行时</div>
+                        <div class="tense-structure">was/were + V-ing</div>
+                    </div>
+                    <div class="tense-card" data-tense="past-perfect">
+                        <div class="tense-name">过去完成时</div>
+                        <div class="tense-structure">had + V3</div>
+                    </div>
+                    <div class="tense-card" data-tense="past-perfect-continuous">
+                        <div class="tense-name">过去完成进行时</div>
+                        <div class="tense-structure">had been + V-ing</div>
+                    </div>
+                    <div class="tense-card" data-tense="future-simple">
+                        <div class="tense-name">一般将来时</div>
+                        <div class="tense-structure">will + V1</div>
+                    </div>
+                    <div class="tense-card" data-tense="future-continuous">
+                        <div class="tense-name">将来进行时</div>
+                        <div class="tense-structure">will be + V-ing</div>
+                    </div>
+                    <div class="tense-card" data-tense="future-perfect">
+                        <div class="tense-name">将来完成时</div>
+                        <div class="tense-structure">will have + V3</div>
+                    </div>
+                    <div class="tense-card" data-tense="future-perfect-continuous">
+                        <div class="tense-name">将来完成进行时</div>
+                        <div class="tense-structure">will have been + V-ing</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-section">
+                <div class="timeline-container">
+                    <h2 class="panel-title"><i class="fas fa-chart-line"></i> 时间轴可视化</h2>
+                    <div class="timeline">
+                        <div class="timeline-now"></div>
+                        <div class="timeline-marker past-marker">过去</div>
+                        <div class="timeline-marker present-marker">现在</div>
+                        <div class="timeline-marker future-marker">将来</div>
+                        
+                        <div class="tense-visual" id="tense-visual" style="background: #568cff; left: 45%; width: 15%;">
+                            一般现在时
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tense-details">
+                    <div class="detail-header">
+                        <div class="tense-title">一般现在时</div>
+                        <div class="tense-structure-large">Subject + Verb (base form)</div>
+                    </div>
+                    
+                    <p>表示习惯性动作、普遍真理、固定安排或永久性情况。</p>
+                    
+                    <div class="usage-examples">
+                        <div class="example">
+                            <div class="example-text">
+                                <div>I <span class="highlight">work</span> every day.</div>
+                                <div class="example-translation">我每天工作。</div>
+                            </div>
+                            <button class="play-btn"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                        <div class="example">
+                            <div class="example-text">
+                                <div>The sun <span class="highlight">rises</span> in the east.</div>
+                                <div class="example-translation">太阳从东方升起。</div>
+                            </div>
+                            <button class="play-btn"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                        <div class="example">
+                            <div class="example-text">
+                                <div>She <span class="highlight">lives</span> in London.</div>
+                                <div class="example-translation">她住在伦敦。</div>
+                            </div>
+                            <button class="play-btn"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h2 class="panel-title"><i class="fas fa-balance-scale"></i> 时态对比工具</h2>
+            <div class="comparison-controls">
+                <select class="comparison-select" id="compare-tense1">
+                    <option value="present-simple">一般现在时</option>
+                    <option value="present-continuous">现在进行时</option>
+                    <option value="past-simple">一般过去时</option>
+                    <option value="future-simple">一般将来时</option>
+                </select>
+                <select class="comparison-select" id="compare-tense2">
+                    <option value="present-continuous">现在进行时</option>
+                    <option value="present-simple">一般现在时</option>
+                    <option value="past-continuous">过去进行时</option>
+                    <option value="future-continuous">将来进行时</option>
+                </select>
+            </div>
+            
+            <div class="comparison-visuals">
+                <div class="comparison-timeline">
+                    <div class="comparison-title">一般现在时</div>
+                    <div class="timeline">
+                        <div class="timeline-now"></div>
+                        <div class="tense-visual" style="background: #568cff; left: 0; width: 100%; height: 40px; top: 40px;">
+                            一般现在时 (习惯性动作)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comparison-timeline">
+                    <div class="comparison-title">现在进行时</div>
+                    <div class="timeline">
+                        <div class="timeline-now"></div>
+                        <div class="tense-visual" style="background: #ff6b6b; left: 45%; width: 15%; height: 40px; top: 40px;">
+                            现在进行时 (当前动作)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-details">
+                <div class="comparison-detail">
+                    <h3><i class="fas fa-check-circle"></i> 一般现在时用法</h3>
+                    <ul>
+                        <li>习惯性或重复性动作</li>
+                        <li>普遍真理和事实</li>
+                        <li>固定安排和时间表</li>
+                        <li>永久性情况</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-detail">
+                    <h3><i class="fas fa-times-circle"></i> 区别要点</h3>
+                    <ul>
+                        <li>现在时表示习惯，进行时表示此刻动作</li>
+                        <li>现在时用于永久情况，进行时用于临时情况</li>
+                        <li>进行时强调动作正在进行</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-detail">
+                    <h3><i class="fas fa-check-circle"></i> 现在进行时用法</h3>
+                    <ul>
+                        <li>正在进行的动作</li>
+                        <li>临时情况</li>
+                        <li>未来安排</li>
+                        <li>逐渐变化的状况</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>英语时态交互学习系统 © 2025 | 仅供ADAM的语言教学测试</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tense data with visualization parameters
+        const tensesData = {
+            "present-simple": {
+                name: "一般现在时",
+                structure: "Subject + Verb (base form)",
+                left: "0%",
+                width: "100%",
+                color: "#568cff",
+                description: "表示习惯性动作、普遍真理、固定安排或永久性情况。",
+                examples: [
+                    "I work every day.",
+                    "The sun rises in the east.",
+                    "She lives in London."
+                ]
+            },
+            "present-continuous": {
+                name: "现在进行时",
+                structure: "am/is/are + Verb-ing",
+                left: "45%",
+                width: "15%",
+                color: "#ff6b6b",
+                description: "表示此刻正在进行的动作，或当前阶段的临时情况。",
+                examples: [
+                    "I am studying English now.",
+                    "They are playing football at the moment.",
+                    "She is staying with her parents this week."
+                ]
+            },
+            "present-perfect": {
+                name: "现在完成时",
+                structure: "have/has + Past Participle",
+                left: "0%",
+                width: "50%",
+                color: "#9b59b6",
+                description: "表示过去发生的动作对现在造成的影响或结果，或从过去持续到现在的动作。",
+                examples: [
+                    "I have finished my homework.",
+                    "She has visited Paris three times.",
+                    "We have known each other for ten years."
+                ]
+            },
+            "present-perfect-continuous": {
+                name: "现在完成进行时",
+                structure: "have/has been + Verb-ing",
+                left: "0%",
+                width: "50%",
+                color: "#2ecc71",
+                description: "强调从过去开始一直持续到现在且可能继续下去的动作。",
+                examples: [
+                    "I have been studying for two hours.",
+                    "It has been raining all day.",
+                    "She has been working here since 2010."
+                ]
+            },
+            "past-simple": {
+                name: "一般过去时",
+                structure: "Subject + Verb (past tense)",
+                left: "25%",
+                width: "15%",
+                color: "#e67e22",
+                description: "表示过去某个特定时间发生的动作或状态。",
+                examples: [
+                    "I visited London last year.",
+                    "She worked as a teacher in 2010.",
+                    "They played tennis yesterday."
+                ]
+            },
+            "past-continuous": {
+                name: "过去进行时",
+                structure: "was/were + Verb-ing",
+                left: "30%",
+                width: "20%",
+                color: "#d35400",
+                description: "表示过去某个时间点或时间段正在进行的动作。",
+                examples: [
+                    "I was studying when you called.",
+                    "They were playing football at 5 PM yesterday.",
+                    "She was cooking dinner all evening."
+                ]
+            },
+            "past-perfect": {
+                name: "过去完成时",
+                structure: "had + Past Participle",
+                left: "15%",
+                width: "20%",
+                color: "#f1c40f",
+                description: "表示在过去某个时间点之前已经完成的动作（过去的过去）。",
+                examples: [
+                    "I had finished my work before they arrived.",
+                    "She had already left when I got there.",
+                    "They had never seen such a beautiful sight before."
+                ]
+            },
+            "past-perfect-continuous": {
+                name: "过去完成进行时",
+                structure: "had been + Verb-ing",
+                left: "10%",
+                width: "25%",
+                color: "#16a085",
+                description: "强调一直持续到过去某个时间点的动作。",
+                examples: [
+                    "I had been studying for two hours when she arrived.",
+                    "They had been waiting for over an hour when the bus finally came.",
+                    "She had been working at that company for five years before she left."
+                ]
+            },
+            "future-simple": {
+                name: "一般将来时",
+                structure: "will + Verb (base form)",
+                left: "70%",
+                width: "15%",
+                color: "#3498db",
+                description: "表示对未来动作或状态的预测、意愿或决定。",
+                examples: [
+                    "I will call you tomorrow.",
+                    "She will be 25 next month.",
+                    "They will probably win the game."
+                ]
+            },
+            "future-continuous": {
+                name: "将来进行时",
+                structure: "will be + Verb-ing",
+                left: "65%",
+                width: "20%",
+                color: "#8e44ad",
+                description: "表示将来某个时间点或时间段正在进行的动作。",
+                examples: [
+                    "This time tomorrow, I will be flying to New York.",
+                    "At 8 PM tonight, we will be having dinner.",
+                    "Don't call at 9; I'll be studying."
+                ]
+            },
+            "future-perfect": {
+                name: "将来完成时",
+                structure: "will have + Past Participle",
+                left: "40%",
+                width: "45%",
+                color: "#27ae60",
+                description: "表示在将来某个时间点之前已经完成的动作。",
+                examples: [
+                    "By next year, I will have graduated.",
+                    "She will have finished the report by tomorrow.",
+                    "They will have been married for 10 years by then."
+                ]
+            },
+            "future-perfect-continuous": {
+                name: "将来完成进行时",
+                structure: "will have been + Verb-ing",
+                left: "30%",
+                width: "55%",
+                color: "#c0392b",
+                description: "强调一直持续到将来某个时间点的动作。",
+                examples: [
+                    "By next month, I will have been working here for five years.",
+                    "In December, we will have been living in this house for a decade.",
+                    "She will have been studying for three hours by the time you arrive."
+                ]
+            }
+        };
+
+        // Select all tense cards
+        const tenseCards = document.querySelectorAll('.tense-card');
+        const tenseVisual = document.getElementById('tense-visual');
+        const tenseTitle = document.querySelector('.tense-title');
+        const tenseStructure = document.querySelector('.tense-structure-large');
+        const tenseDescription = document.querySelector('.tense-details p');
+        const examplesContainer = document.querySelector('.usage-examples');
+        
+        // Add event listeners to tense cards
+        tenseCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all cards
+                tenseCards.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked card
+                this.classList.add('active');
+                
+                // Get the tense type from data attribute
+                const tenseType = this.getAttribute('data-tense');
+                
+                // Update visualization
+                updateTenseVisualization(tenseType);
+            });
+        });
+        
+        // Update tense visualization function
+        function updateTenseVisualization(tenseType) {
+            const tense = tensesData[tenseType];
+            
+            // Update the visual element
+            tenseVisual.textContent = tense.name;
+            tenseVisual.style.background = tense.color;
+            tenseVisual.style.left = tense.left;
+            tenseVisual.style.width = tense.width;
+            
+            // Update the details section
+            tenseTitle.textContent = tense.name;
+            tenseStructure.textContent = tense.structure;
+            tenseDescription.textContent = tense.description;
+            
+            // Update examples
+            examplesContainer.innerHTML = '';
+            tense.examples.forEach(example => {
+                const exampleParts = example.split(' ');
+                const highlightedExample = exampleParts.map(word => {
+                    // Highlight the verb part (simplified logic)
+                    if (word === "am" || word === "is" || word === "are" || 
+                        word === "was" || word === "were" || word === "have" || 
+                        word === "has" || word === "had" || word === "will" ||
+                        word.includes("ing") || word.includes("ed")) {
+                        return `<span class="highlight">${word}</span>`;
+                    }
+                    return word;
+                }).join(' ');
+                
+                const exampleDiv = document.createElement('div');
+                exampleDiv.className = 'example';
+                exampleDiv.innerHTML = `
+                    <div class="example-text">
+                        <div>${highlightedExample}</div>
+                        <div class="example-translation">${getTranslation(example)}</div>
+                    </div>
+                    <button class="play-btn"><i class="fas fa-volume-up"></i></button>
+                `;
+                examplesContainer.appendChild(exampleDiv);
+            });
+            
+            // Add event listeners to new play buttons
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.previousElementSibling.querySelector('div').textContent;
+                    speakText(text);
+                });
+            });
+        }
+        
+        // Simple translation mapping
+        function getTranslation(example) {
+            const translations = {
+                "I work every day.": "我每天工作。",
+                "The sun rises in the east.": "太阳从东方升起。",
+                "She lives in London.": "她住在伦敦。",
+                "I am studying English now.": "我现在正在学习英语。",
+                "They are playing football at the moment.": "他们此刻正在踢足球。",
+                "She is staying with her parents this week.": "她这周和父母住在一起。",
+                "I have finished my homework.": "我已经完成了作业。",
+                "She has visited Paris three times.": "她已经去过巴黎三次了。",
+                "We have known each other for ten years.": "我们认识已经十年了。",
+                "I have been studying for two hours.": "我已经学习两个小时了。",
+                "It has been raining all day.": "雨下了一整天。",
+                "She has been working here since 2010.": "她从2010年就在这里工作了。",
+                "I visited London last year.": "我去年去了伦敦。",
+                "She worked as a teacher in 2010.": "她在2010年当老师。",
+                "They played tennis yesterday.": "他们昨天打了网球。",
+                "I was studying when you called.": "你打电话时我正在学习。",
+                "They were playing football at 5 PM yesterday.": "昨天下午5点他们在踢足球。",
+                "She was cooking dinner all evening.": "她整个晚上都在做晚饭。",
+                "I had finished my work before they arrived.": "在他们到达之前我已经完成了工作。",
+                "She had already left when I got there.": "我到那里时她已经离开了。",
+                "They had never seen such a beautiful sight before.": "他们以前从未见过如此美丽的景色。",
+                "I had been studying for two hours when she arrived.": "她到达时我已经学习两个小时了。",
+                "They had been waiting for over an hour when the bus finally came.": "公交车终于来时，他们已经等了一个多小时。",
+                "She had been working at that company for five years before she left.": "她离开前已在那家公司工作了五年。",
+                "I will call you tomorrow.": "我明天会给你打电话。",
+                "She will be 25 next month.": "她下个月就25岁了。",
+                "They will probably win the game.": "他们可能会赢得比赛。",
+                "This time tomorrow, I will be flying to New York.": "明天这个时候，我将在飞往纽约的途中。",
+                "At 8 PM tonight, we will be having dinner.": "今晚8点，我们将在吃晚餐。",
+                "Don't call at 9; I'll be studying.": "9点不要打电话，我那时在学习。",
+                "By next year, I will have graduated.": "到明年，我就已经毕业了。",
+                "She will have finished the report by tomorrow.": "她明天之前会完成报告。",
+                "They will have been married for 10 years by then.": "到那时，他们结婚就满10年了。",
+                "By next month, I will have been working here for five years.": "到下个月，我在这里工作就满五年了。",
+                "In December, we will have been living in this house for a decade.": "到十二月，我们在这所房子居住就满十年了。",
+                "She will have been studying for three hours by the time you arrive.": "等你到时，她就学习满三个小时了。"
+            };
+            
+            return translations[example] || "翻译不可用";
+        }
+        
+        // Text to speech function
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            } else {
+                alert("您的浏览器不支持文本朗读功能");
+            }
+        }
+        
+        // Initialize with the first tense
+        updateTenseVisualization('present-simple');
+        
+        // Add event listeners to play buttons in examples
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const text = this.previousElementSibling.querySelector('div').textContent;
+                speakText(text);
+            });
+        });
+        
+        // Comparison functionality
+        const compareSelect1 = document.getElementById('compare-tense1');
+        const compareSelect2 = document.getElementById('compare-tense2');
+        
+        [compareSelect1, compareSelect2].forEach(select => {
+            select.addEventListener('change', updateComparison);
+        });
+        
+        function updateComparison() {
+            const tense1 = compareSelect1.value;
+            const tense2 = compareSelect2.value;
+            
+            // In a real implementation, you would update the comparison visuals here
+            document.querySelectorAll('.comparison-title')[0].textContent = tensesData[tense1].name;
+            document.querySelectorAll('.comparison-title')[1].textContent = tensesData[tense2].name;
+        }
+    </script>
+</body>
+</html>
